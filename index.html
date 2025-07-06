@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --text: #1f2937;
+            --light: #f9fafb;
+            --white: #ffffff;
+            --gray: #e5e7eb;
+            --dark-gray: #6b7280;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0;
+        }
+        
+        .tagline {
+            color: var(--dark-gray);
+            font-size: 1.1rem;
+        }
+        
+        .search-container {
+            position: relative;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        #searchInput {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            border: 1px solid var(--gray);
+            border-radius: 0.5rem;
+            background-color: var(--white);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        
+        #searchButton {
+            padding: 0 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        #searchButton:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .status {
+            text-align: center;
+            margin: 2rem 0;
+            color: var(--dark-gray);
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .loading-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        .results {
+            background-color: var(--white);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .result:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .result-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .result-content {
+            color: var(--text);
+        }
+        
+        .result-source {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 8V16" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 12H16" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <h1>AI</h1>
+            </div>
+            <p class="tagline">Get anwser from AI</p>
+        </header>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Ask me anything...">
+            <button id="searchButton">Search</button>
+        </div>
+        
+        <div id="searchStatus" class="status hidden">
+            <div class="loading">
+                <div class="loading-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <span>Searching...</span>
+            </div>
+        </div>
+        
+        <div id="resultsContainer" class="results hidden">
+            <!-- Results will appear here -->
+        </div>
+        
+        <footer>
+            Powered by Ahmad • Answers generated in real-time
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const searchStatus = document.getElementById('searchStatus');
+            const resultsContainer = document.getElementById('resultsContainer');
+            
+            // Handle search
+            function performSearch() {
+                const query = searchInput.value.trim();
+                
+                if (query) {
+                    // Show loading state
+                    searchStatus.classList.remove('hidden');
+                    resultsContainer.classList.add('hidden');
+                    
+                    // In a real implementation, you would call the DeepSeek API here
+                    // For this demo, we'll simulate an API call with setTimeout
+                    setTimeout(() => {
+                        generateAIResponse(query);
+                    }, 1500);
+                }
+            }
+            
+            // Handle button click
+            searchButton.addEventListener('click', performSearch);
+            
+            // Handle Enter key
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            // Generate simulated AI response
+            function generateAIResponse(query) {
+                searchStatus.classList.add('hidden');
+                resultsContainer.classList.remove('hidden');
+                
+                // Simulate different responses based on query
+                let response;
+                let sources = [];
+                
+                if (query.toLowerCase().includes('how') || query.toLowerCase().includes('what')) {
+                    response = `
+                        <p>Based on my knowledge and current search results, here's what I found about "${query}":</p>
+                        <p>${getRandomAnswer(query)}</p>
+                        <p>This information comes from multiple verified sources and is synthesized to give you the most accurate answer possible.</p>
+                    `;
+                    sources = [
+                        "DeepSeek Knowledge Base",
+                        "Academic Publications",
+                        "Verified Online Sources"
+                    ];
+                } else if (query.toLowerCase().includes('who')) {
+                    response = `
+                        <p>According to my research, here's information about "${query}":</p>
+                        <p>${getRandomPersonAnswer(query)}</p>
+                        <p>This profile information is compiled from authoritative biographical sources.</p>
+                    `;
+                    sources = [
+                        "Biographical Databases",
+                        "Official Records",
+                        "News Archives"
+                    ];
+                } else {
+                    response = `
+                        <p>Here's a comprehensive answer to your query about "${query}":</p>
+                        <p>${getRandomGeneralAnswer(query)}</p>
+                        <p>This response combines data from multiple reliable sources to ensure accuracy.</p>
+                    `;
+                    
+                }
+                
+                // Display the response
+                resultsContainer.innerHTML = `
+                    <div class="result">
+                        <div class="result-title">AI Response</div>
+                        <div class="result-content">${response}</div>
+                        <div class="result-source">
+                        ${sources.join(', ')}</div>
+                    </div>
+                `;
+            }
+            
+            // Helper functions to generate random answers
+            function getRandomAnswer(query) {
+                const answers = [
+                    `The process involves several key steps that have been well-documented in recent studies. First, the system initiates a preliminary analysis phase where it evaluates all available data points. Then it proceeds to the interpretation stage where patterns are identified. Finally, it synthesizes this information into actionable insights.`,
+                    `Current research indicates there are three primary methods to approach this. The traditional method remains popular but newer techniques have shown 23% greater efficiency in controlled tests. Most experts recommend a hybrid approach for optimal results.`,
+                    `This is a complex topic with many variables to consider. The most important factors are environmental conditions, resource availability, and timing. Studies from 2022-2023 show promising developments in this area.`
+                ];
+                return answers[Math.floor(Math.random() * answers.length)];
+            }
+            
+            function getRandomPersonAnswer(query) {
+                const answers = [
+                    `This individual is known for their significant contributions in their field. They began their career in the early 2000s and quickly rose to prominence due to their innovative approach. Their most notable work includes several groundbreaking projects that changed industry standards.`,
+                    `A respected figure in their domain, they have received numerous awards and recognition for their work. Their biography shows a pattern of consistent achievement and leadership in challenging environments.`,
+                    `Emerging as a key personality in recent years, their influence has grown substantially. Colleagues describe them as visionary with a unique ability to solve complex problems.`
+                ];
+                return answers[Math.floor(Math.random() * answers.length)];
+            }
+            
+            function getRandomGeneralAnswer(query) {
+                const answers = [
+                    `Comprehensive analysis reveals several important aspects about this topic. The primary consideration is understanding the fundamental principles, which then allows for more advanced applications. Recent data suggests this field is growing at approximately 15% annually.`,
+                    `This subject encompasses a wide range of concepts and applications. The core theory is well-established, but practical implementations vary significantly based on context. Industry leaders are currently focusing on three key areas of development.`,
+                    `Historical context is important for fully grasping this topic. The current state represents an evolution of ideas that began decades ago, with modern innovations building on this strong foundation. Future projections indicate even more dramatic changes ahead.`
+                ];
+                return answers[Math.floor(Math.random() * answers.length)];
+            }
+        });
+    </script>
+</body>
+</html>
